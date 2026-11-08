@@ -1,0 +1,35 @@
+# kodict configuration.
+
+[output]
+locale = "ko"
+dict_type = "main"
+dict_version = 20        # >= 18 required for all AOSP keyboards
+description = "Korean"
+# write words NFD (canonical jamo sequences): LeanType/HeliBoard decompose
+# the typed word before the native trie lookup — an NFC dictionary never
+# matches, so Korean prediction silently returns nothing
+decompose = true
+dir = "out"
+# relative to the repository root, fetched by scripts/fetch_deps.sh
+dicttool = "deps/aosp-dictionary-tools/dicttool_aosp.jar"
+
+[mine]
+# wikimedia/wikipedia dated subdir — pin stays fixed for reproducibility
+dataset = "wikimedia/wikipedia"
+subdir = "20231101.ko"
+cache_dir = "state/wiki"
+out_dir = "state/wiki/shards"
+# unigram floor: wiki is full of typos/one-off names; 3 cuts them
+min_count = 3
+max_words = 100000
+# bigram scope: bounds the pair-count table (memory) while covering
+# everything a user would plausibly have typed + spaced. 10k/20k left only
+# 9.4% of the wordlist with next-word data (unknown contexts fell back to
+# history) — 50k costs RAM, not money (no LLM in this path).
+bigram_parents = 50000
+bigram_children = 50000
+# parent→child links need this much evidence to be trusted; 3 keeps
+# mid-frequency parents alive (pairs are real adjacency either way, so
+# lowering this cannot re-introduce the invented-pair bug)
+min_bigram_count = 3
+shard_words = 10000
