@@ -1,0 +1,41 @@
+# kodict configuration.
+# API key is read from the OPENROUTER_API_KEY environment variable.
+
+[model]
+name = "qwen/qwen3.6-35b-a3b"
+# Only route to providers serving the model in fp8 (see api-docs/api.md,
+# "Provider Routing > Quantization").
+quantizations = ["fp8"]
+allow_fallbacks = true
+# high enough temperature + a frequency penalty: greedy sampling collapses
+# into repetition loops ("저/나/너" repeating) within the first 10 entries
+temperature = 0.7
+# do NOT use frequency_penalty here: it accumulates over generated tokens and
+# kills the repeated JSON structure ("rank"/"word"/braces), stopping a
+# 400-item list after ~4 items. repetition_penalty is constant instead.
+frequency_penalty = 0.0
+repetition_penalty = 1.1
+# thinking must stay off: on some fp8 providers the model answers entirely
+# inside `reasoning` and `content` comes back empty (see state/run.log)
+reasoning_enabled = false
+# cheapest fp8 endpoints first (Prime Intellect ≈ 10x cheaper than
+# DeepInfra/CoreWeave); allow_fallbacks still walks down the price list
+sort = "price"
+max_tokens = 8192        # a 400-word JSONL band is ~6-9k output tokens
+
+[jobs]
+count = 16
+max_retries = 3          # caps worst-case spend: 4 attempts per task
+
+[output]
+locale = "ko"
+dict_type = "main"
+dict_version = 20        # >= 18 required for all AOSP keyboards
+description = "Korean"
+# write words NFD (canonical jamo sequences): LeanType/HeliBoard decompose
+# the typed word before the native trie lookup — an NFC dictionary never
+# matches, so Korean prediction silently returns nothing
+decompose = true
+dir = "out"
+# relative to the repository root, fetched by scripts/fetch_deps.sh
+dicttool = "deps/aosp-dictionary-tools/dicttool_aosp.jar"

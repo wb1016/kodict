@@ -1,0 +1,16 @@
+# fetched dependencies (Apache-2.0, not distributed with this repo)
+deps/
+
+# python
+.venv/
+.env
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# generated artifacts
+out/
+state/
